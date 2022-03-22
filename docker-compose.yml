@@ -1,0 +1,48 @@
+version: "3.8"
+services:
+  server:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: debug
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - db
+    ports:
+      - "8080:8080"
+    tty: true
+    environment:
+      DB_HOST: db-container
+      DB_PORT: 5432
+      DB_USER: test
+      DB_PASSWORD: test
+      DB_NAME: template
+      TZ: "Asia/Tokyo"
+      REDIS_HOST: redis-container:6379
+      REDIS_PASSWORD:
+      TOKEN_SECURITY_KEY: 3b93f2d6700480b63c71f8d1f802e878
+  redis:
+    image: redis:6.2.6
+    container_name: redis-container
+    restart: always
+    ports:
+      - "6379:6379"
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - redis-db:/data
+  db:
+    image: postgres:12.3-alpine
+    container_name: db-container
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      TZ: "Asia/Tokyo"
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: template
+volumes:
+  redis-db:
